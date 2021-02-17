@@ -249,28 +249,136 @@ const [players1, players2] = game.players;
 
 // 2.
 const [gk, ...fieldPlayers] = players1;
-console.log(gk, fieldPlayers);
+// console.log(gk, fieldPlayers);
 
 // 3.
 const allPlayers = [...players1, ...players2];
-console.log(allPlayers);
+// console.log(allPlayers);
 
 // 4.
 const players1Final = [...players1, 'Thiago', 'Coutinho', 'Perisic'];
-console.log(players1Final);
+// console.log(players1Final);
 
 // 5.
 const { team1, x: draw, team2 } = game.odds;
-console.log(draw);
+// console.log(draw);
 
 // 6.
 const printGoals = function (...players) {
-  console.log(`${players.length} goals were scored!`);
+  // console.log(`${players.length} goals were scored!`);
 };
 
 printGoals('Davies', 'Mullers', 'Lewandowski', 'Kimmich');
 printGoals(...game.scored);
 
 // 7.
-team1 < team2 && console.log('Team 1 is more likely to win!');
-team1 > team2 && console.log('Team 2 is more likely to win!');
+// team1 < team2 && console.log('Team 1 is more likely to win!');
+// team1 > team2 && console.log('Team 2 is more likely to win!');
+
+/** FOR OF LOOP */
+
+const fullMenu = [...restaurant.starterMenu, ...restaurant.mainMenu];
+
+for (const item of fullMenu) {
+  // console.log(item);
+}
+
+// .entries is to get the index
+for (const item of fullMenu.entries()) {
+  // console.log(`${item[0] + 1}: ${item[1]}`);
+}
+
+// destructure item
+for (const [i, item] of fullMenu.entries()) {
+  // console.log(`${i + 1}: ${item}`);
+}
+
+/*** OPTIONAL CHAINING ***/
+
+// only if mon exists then log the open value otherwise log 'undefined'
+// console.log(restaurant.openingHours.mon?.open);
+// Without the "?" code will throw a typeError
+// console.log(restaurant.openingHours.mon.open);
+
+// Before optional chainging this was how you did it
+if (restaurant.openingHours && restaurant.openingHours.mon) {
+  // console.log(restaurant.openingHours.mon.open);
+}
+const days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+for (const day of days) {
+  // Using the ?? nullish coalescing operator, instead of || which will be falsy for Sat
+  const open = restaurant.openingHours[day]?.open ?? 'closed';
+  // console.log(`On ${day}, we open at ${open}`);
+}
+
+// Methods
+// console.log(restaurant.order?.(0, 1) ?? 'Method does not exist!');
+// fake method to show nullish coalescing operator workings
+// console.log(restaurant.orderRisotto?.(0, 1) ?? 'Method does not exist!');
+
+// Arrays
+const users = [{ name: 'Dan', email: 'hello@dan.io' }];
+// console.log(users[0]?.name ?? 'User array emptys');
+// console.log(users[0]?.birthDate ?? 'User array empty!');
+
+// Before optional chaining
+if (users.length > 0) {
+  // console.log(users[0].name);
+} else {
+  // console.log('user array empty!');
+}
+
+/*** LOOPING OBJECTS, KEYS,  VALUES***/
+
+// Property Names
+const properties = Object.keys(openingHours);
+
+let openText = `we are open on ${properties.length} days: `;
+
+for (const day of Object.keys(openingHours)) {
+  openText += `${day}, `;
+}
+
+// console.log(openText);
+
+// Property Values
+const values = Object.values(openingHours);
+
+// Entire Object (Key and Value)
+const entries = Object.entries(openingHours);
+
+for (const [key, { open, close }] of entries) {
+  // console.log(`On ${key} we open at ${open} and close at ${close}`);
+}
+
+/*** Code Challenge 2 ***/
+
+// 1.
+for (const [idx, player] of game.scored.entries()) {
+  // console.log(`Goal ${idx + 1}: ${player}`);
+}
+// 2.
+const odds = Object.values(game.odds);
+
+let average = 0;
+for (const value of odds) {
+  average += value / odds.length;
+}
+// console.log(average);
+
+// 3.
+for (const [team, value] of Object.entries(game.odds)) {
+  const teamStr = team === 'x' ? 'draw' : `victory ${game[team]}`;
+  console.log(`Odd of ${teamStr} ${value}`);
+}
+
+// 4.
+const scorers = {};
+
+for (const player of game.scored) {
+  if (scorers[player]) scorers[player] += 1;
+  else scorers[player] = 1;
+}
+
+console.log(scorers);
+s;
