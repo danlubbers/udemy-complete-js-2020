@@ -369,7 +369,7 @@ for (const value of odds) {
 // 3.
 for (const [team, value] of Object.entries(game.odds)) {
   const teamStr = team === 'x' ? 'draw' : `victory ${game[team]}`;
-  console.log(`Odd of ${teamStr} ${value}`);
+  // console.log(`Odd of ${teamStr} ${value}`);
 }
 
 // 4.
@@ -380,5 +380,144 @@ for (const player of game.scored) {
   else scorers[player] = 1;
 }
 
-console.log(scorers);
-s;
+// console.log(scorers);
+
+/*** Sets ***/
+
+// No duplicates in sets, elements are unique, order is irrelevant
+const ordersSet = new Set([
+  'Pasta',
+  'Pizza',
+  'Pizza',
+  'Risotto',
+  'Pasta',
+  'Pizza',
+]);
+
+// console.log(ordersSet);
+// console.log(ordersSet.size); //  size instead of length
+// console.log(ordersSet.has('Pizza')); // true
+// console.log(ordersSet.has('bread')); // false
+ordersSet.add('Garlic Bread'); // pushed to set
+ordersSet.add('Garlic Bread'); // no duplicates, not added
+// console.log(ordersSet);
+ordersSet.delete('Risotto'); // delete element
+// console.log(ordersSet);
+
+// Set looping
+for (const order of ordersSet) {
+  // console.log(order);
+}
+
+const staff = ['Waiter', 'Chef', 'Waiter', 'Manager', 'Chef', 'Waiter'];
+const uniqueStaff = [...new Set(staff)]; // use spread operator [...] to create array instead of object
+// console.log(uniqueStaff);
+
+/*** Maps ***/
+// Keys can be anything unlike Objects, where keys can only be strings
+
+const restMap = new Map();
+
+restMap.set('name', 'Classico Italiano');
+restMap.set(1, 'Firenze, Italy');
+restMap.set(2, 'Lisbon, Portugal');
+// console.log(restMap);
+
+restMap
+  .set('categories', ['Italian', 'Pizzeria', 'Vegetarian', 'Organic'])
+  .set('open', 11)
+  .set('closed', 23)
+  .set(true, 'We are open!')
+  .set(false, 'We are closed!');
+
+// console.log(restMap);
+
+// console.log(restMap.get('name'));
+// console.log(restMap.get(true));
+
+const time = 21;
+const openOrClosed = restMap.get(
+  time > restMap.get('open') && time < restMap.get('closed')
+);
+// console.log(openOrClosed);
+
+// console.log(restMap.has('categories'));
+restMap.delete(2);
+// console.log(restMap);
+// console.log(restMap.size);
+
+restMap.set(document.querySelector('h1'), 'Heading');
+restMap.set([1, 2], 'TEST');
+// console.log(restMap);
+
+const question = new Map([
+  ['question', 'What is the best programming language in the world?'],
+  [1, 'C'],
+  [2, 'Java'],
+  [3, 'Javascript'],
+  ['correct', 3],
+  [true, 'Correct!'],
+  [false, 'Try Again!'],
+]);
+
+// console.log(question);
+
+// Convert Object to Map
+const hoursMap = new Map(Object.entries(openingHours));
+// console.log(hoursMap);
+
+// Iteration
+for (const [key, value] of question) {
+  if (typeof key === 'number') {
+    // console.log(`Answer ${key}: ${value}`);
+  }
+}
+
+// const answer = Number(prompt('Your Answer'));
+// if (answer === question.get('correct')) {
+//   console.log(question.get(true));
+// } else {
+//   console.log(question.get(false));
+// }
+
+// Convert Map to array
+// console.log([...question]);
+// console.log([...question.keys()]);
+// console.log([...question.values()]);
+
+/***  Coding Challenge 3 ***/
+
+const gameEvents = new Map([
+  [17, '⚽️ GOAL'],
+  [36, '🔁 Substitution'],
+  [47, '⚽️ GOAL'],
+  [61, '🔁 Substitution'],
+  [64, '🔶 Yellow card'],
+  [69, '🔴 Red card'],
+  [70, '🔁 Substitution'],
+  [72, '🔁 Substitution'],
+  [76, '⚽️ GOAL'],
+  [80, '⚽️ GOAL'],
+  [92, '🔶 Yellow card'],
+]);
+
+// 1.
+const events = [...new Set(gameEvents.values())];
+console.log(events);
+
+// 2.
+gameEvents.delete(64);
+// console.log(gameEvents);
+
+// 3.
+const gameTime = [...gameEvents.keys()].pop();
+const averageEventTime = gameTime / gameEvents.size;
+console.log(
+  `An event happened, on average, every ${averageEventTime} minutes.`
+);
+
+// 4.
+for (const [num, value] of gameEvents.entries()) {
+  const half = num <= 45 ? 'FIRST' : 'SECOND';
+  console.log(`[${half} HALF]${num}: ${value}`);
+}
