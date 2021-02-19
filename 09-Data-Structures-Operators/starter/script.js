@@ -503,7 +503,7 @@ const gameEvents = new Map([
 
 // 1.
 const events = [...new Set(gameEvents.values())];
-console.log(events);
+// console.log(events);
 
 // 2.
 gameEvents.delete(64);
@@ -512,12 +512,190 @@ gameEvents.delete(64);
 // 3.
 const gameTime = [...gameEvents.keys()].pop();
 const averageEventTime = gameTime / gameEvents.size;
-console.log(
-  `An event happened, on average, every ${averageEventTime} minutes.`
-);
+// console.log(
+//   `An event happened, on average, every ${averageEventTime} minutes.`
+// );
 
 // 4.
 for (const [num, value] of gameEvents.entries()) {
   const half = num <= 45 ? 'FIRST' : 'SECOND';
-  console.log(`[${half} HALF]${num}: ${value}`);
+  // console.log(`[${half} HALF]${num}: ${value}`);
 }
+
+/*** Strings ***/
+
+const airline = 'TAP Air Portugal';
+const plane = 'A320';
+
+// console.log(airline.length); // length of string
+// console.log(airline.indexOf('r')); // gets position
+// console.log(airline.lastIndexOf('r')); // last possible position
+// console.log(airline.indexOf('Portugal')); // starts at position 8 ( case sensitive )
+
+// console.log(airline.slice(4)); // position at where slice starts, subString result "Air Portugal"
+// console.log(airline.slice(4, 7)); // start and end index, subString result "Air"
+
+// console.log(airline.slice(0, airline.indexOf(' '))); // First word, result is "TAP"
+// console.log(airline.slice(airline.lastIndexOf(' ') + 1)); // + 1 gets rid of the space. last word, result is "Portugal"
+
+// console.log(airline.slice(-2)); // last two characters in string
+// console.log(airline.slice(1, -1)); // Cuts off first character and last character
+
+const checkMiddleSeat = function (seat) {
+  // B and E are middle seats
+  const isMiddleSeat = seat.slice(-1);
+  if (isMiddleSeat === 'B' || isMiddleSeat === 'E') {
+    // console.log('You got the middle seat!');
+  } else {
+    // console.log('You got lucky!');
+  }
+};
+
+checkMiddleSeat('11B');
+checkMiddleSeat('23C');
+checkMiddleSeat('3E');
+
+// Fix capitalization in name
+const passenger = 'jOnAs';
+const passengerLower = passenger.toLowerCase();
+const passengerCorrect =
+  passengerLower[0].toUpperCase() + passengerLower.slice(1);
+// console.log(passengerCorrect);
+
+// Compare email
+const email = 'hello@jonas.io';
+const loginEmail = '  Hello@Jonas.Io \n';
+
+const normalizedEmail = loginEmail.toLowerCase().trim();
+// console.log(normalizedEmail);
+// console.log(email === normalizedEmail);
+
+// replacing
+const priceGB = '288,97£';
+const priceUS = priceGB.replace('£', '$').replace(',', '.');
+// console.log(priceUS);
+
+// replace all instances
+const announcement =
+  'All passengers come to boarding door 23. Boarding door 23!';
+
+// Using Regex
+// console.log(announcement.replace(/door/g, 'gate'));
+// replaceALL is the new way
+// console.log(announcement.replaceAll('door', 'gate'));
+
+// Booleans | includes | startsWith | endsWith
+const planeA320 = 'Airbus A320neo';
+
+// console.log(planeA320.includes('neo'));
+// console.log(planeA320.includes('boeing'));
+// console.log(planeA320.startsWith('Air'));
+
+if (planeA320.startsWith('Airbus') && planeA320.endsWith('neo')) {
+  // console.log('Part of the NEW Airbus family');
+}
+
+// Practice exercise
+const checkBaggage = function (items) {
+  const lowerBaggage = items.toLowerCase();
+  if (lowerBaggage.includes('knife') || lowerBaggage.includes('gun')) {
+    // console.log('You are NOT allowed to board');
+  } else {
+    // console.log('Welcome aboard!');
+  }
+};
+
+checkBaggage('I have a laptop, some Food and a pocket Knife.');
+checkBaggage('I have some socks and a camera');
+checkBaggage('Got some snacks and a gun for protection.');
+
+// Split and Join
+// console.log('a+very+nice+string'.split('+'));
+
+const [firstName, lastName] = 'Dan Lubbers'.split(' ');
+// console.log(lastName);
+
+const newName = ['Mr.', firstName, lastName.toUpperCase()].join(' ');
+// console.log(newName);
+
+const capitalizeName = function (name) {
+  const nameArr = name.split(' ');
+  const namesUpper = [];
+
+  for (const word of nameArr) {
+    // Two different ways to do it
+    // namesUpper.push(word[0].toUpperCase() + word.slice(1));
+    namesUpper.push(word.replace(word[0], word[0].toUpperCase()));
+  }
+  // console.log(namesUpper.join(' '));
+};
+
+capitalizeName('jessica ann smith davis');
+
+// Padding
+
+const message = 'Go to gate 23!';
+// console.log(message.padStart(25, '+').padEnd(35, '+'));
+// console.log('Dan'.padStart(20, '+').padEnd(30, '+'));
+
+const maskCreditCard = function (num) {
+  const strNum = num + '';
+  const last = strNum.slice(-4);
+  return last.padStart(strNum.length, '*');
+};
+
+// console.log(maskCreditCard(4123987912567596));
+
+// Repeat
+const repeatMsg = 'Bad weather... All departures delayed... \n';
+// console.log(repeatMsg.repeat(5));
+
+const planesInLine = function (planes) {
+  // console.log(`There are ${planes} planes in line ${'🛩'.repeat(planes)}`);
+};
+
+planesInLine(8);
+planesInLine(3);
+
+/*** Code Challenge 4 ***/
+/** 
+THIS TEST DATA (pasted to textarea)
+underscore_case
+ first_name
+Some_Variable 
+  calculate_AGE
+delayed_departure
+
+SHOULD PRODUCE THIS OUTPUT (5 separate console.log outputs)
+underscoreCase      ✅
+firstName           ✅✅
+someVariable        ✅✅✅
+calculateAge        ✅✅✅✅
+delayedDeparture    ✅✅✅✅✅
+
+HINT 1: Remember which character defines a new line in the textarea 😉
+HINT 2: The solution only needs to work for a variable made out of 2 words, like a_b
+HINT 3: Start without worrying about the ✅. Tackle that only after you have the variable name conversion working 😉
+HINT 4: This challenge is difficult on purpose, so start watching the solution in case you're stuck. Then pause and continue!
+*/
+
+document.body.append(document.createElement('textarea'));
+document.body.append(document.createElement('button'));
+
+document.querySelector('button').addEventListener('click', () => {
+  const text = document.querySelector('textarea').value;
+
+  let splitWords = text.split('\n');
+  // console.log(splitWords);
+
+  for (const [idx, word] of splitWords.entries()) {
+    const [first, second] = word.toLowerCase().trim().split('_');
+
+    const output = `${first}${second.replace(
+      second[0],
+      second[0].toUpperCase()
+    )}`;
+
+    console.log(`${output.padEnd(20)}${'✅'.repeat(idx + 1)}`);
+  }
+});
