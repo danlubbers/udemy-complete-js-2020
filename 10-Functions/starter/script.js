@@ -211,3 +211,83 @@ const pollBtn = document
 
 poll.displayResults.call({ answers: [5, 2, 3] }, 'string');
 poll.displayResults.call({ answers: [1, 5, 3, 9, 6, 1] });
+
+/*** IIFE ***/
+
+(function () {
+  console.log('Only run once!');
+  const isPrivate = 26;
+})();
+
+// Block Scoped for data privacy
+{
+  const isPrivate = 40;
+}
+
+// console.log(isPrivate); // creates private scoped variables for security reasons
+
+/*** CLOSURES ***/
+
+const secureBooking = function () {
+  let passengerCount = 0;
+
+  return function () {
+    passengerCount++;
+    console.log(`${passengerCount} passengers`);
+  };
+};
+
+const booker = secureBooking();
+
+booker();
+booker();
+booker();
+
+// Example 1
+let f;
+
+const g = function () {
+  const a = 24;
+  f = function () {
+    console.log(a * 2);
+  };
+};
+
+const h = function () {
+  const b = 777;
+  f = function () {
+    console.log(b * 2);
+  };
+};
+
+g();
+f();
+
+// Re-assigning f function
+h();
+f();
+console.dir(f);
+
+// Example 2
+const boardPassengers = function (n, wait) {
+  const perGroup = n / 3;
+
+  setTimeout(function () {
+    console.log(`We are now boarding all ${n} passengers`);
+    console.log(`There are 3 groups, each with ${perGroup} passengers`);
+  }, wait * 1000);
+
+  console.log(`Will start boarding in ${wait} seconds`);
+};
+
+const perGroup = 1000; // this global variable does not affect the closure scope chain variable
+boardPassengers(180, 3);
+
+// Code Challenge 2
+(function () {
+  const header = document.querySelector('h1');
+  header.style.color = 'red';
+  document.body.addEventListener('click', () => {
+    header.style.color = 'blue';
+  });
+})();
