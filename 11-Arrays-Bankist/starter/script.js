@@ -61,16 +61,115 @@ const inputLoanAmount = document.querySelector('.form__input--loan-amount');
 const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
 
+const displayMovements = function (movements) {
+  containerMovements.innerHTML = ''; // this overrides previous data to add new elements
+  movements.forEach((movement, idx) => {
+    const type = movement > 0 ? 'deposit' : 'withdrawal';
+    const html = `
+    <div class="movements__row">
+      <div class="movements__type movements__type--${type}">${
+      idx + 1
+    } ${type}</div>
+      <div class="movements__date">3 days ago</div>
+      <div class="movements__value">${movement}€</div>
+  </div>
+    `;
+    containerMovements.insertAdjacentHTML('afterbegin', html);
+  });
+};
+
+displayMovements(account1.movements);
+
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
 // LECTURES
 
+/////////////////////////////////////////////////
+
+let arr = ['a', 'b', 'c', 'd', 'e'];
+
+// Slice - Immutable
+// console.log(arr.slice()); // creates a shallow copy of the array
+// console.log([...arr]); // new way to create a shallow copy
+
+// console.log(arr.slice(2)); // start at index 2
+// console.log(arr.slice(2, 4)); // start at index 2 and go to index 4
+// console.log(arr.slice(-2)); // last two element
+// console.log(arr.slice(1, -1)); // start at index 1 and stop before last index
+
+// Splice - Mutates the array
+// console.log(arr.splice(2));
+// console.log(arr.splice(-1));
+// console.log(arr); // Has been mutated
+
+// Reverse - Mutates the array
+arr = ['a', 'b', 'c', 'd', 'e'];
+const arr2 = ['j', 'i', 'h', 'g', 'f'];
+
+// console.log(arr2.reverse());
+
+// Concat
+const letters = arr.concat(arr2);
+// console.log(letters);
+// console.log([...arr, ...arr2]); // new way to do the concat method
+
+// Join
+// console.log(letters.join('-')); // turns array values into a string
+
+/*** forEach Method ***/
+const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
+
+// Using For Of Loop
+// for (const value of movements) {
+//   if (value > 0) {
+//     console.log(`You deposited ${value}`);
+//   } else {
+//     console.log(`You withdrew ${Math.abs(value)}`);
+//   }
+// }
+
+movements.forEach((value, idx) => {
+  if (value > 0) {
+    // console.log(`Movement ${idx + 1}: You deposited ${value}`);
+  } else {
+    // console.log(`Movement ${idx + 1}: You withdrew ${Math.abs(value)}`);
+  }
+});
+
+// forEach with Maps and Sets
 const currencies = new Map([
   ['USD', 'United States dollar'],
   ['EUR', 'Euro'],
   ['GBP', 'Pound sterling'],
 ]);
 
-const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
+// MAP
+currencies.forEach((value, key, map) => {
+  // console.log(key, value);
+});
 
-/////////////////////////////////////////////////
+// SET - does not have keys or indexes
+const currenciesSet = new Set(['USD', 'GBP', 'USD', 'EUR', 'EUR']);
+currenciesSet.forEach((value, _, map) => {
+  // console.log(value);
+});
+
+// Code Challenge 1
+
+const checkDogs = (juliasDogs, katesDogs) => {
+  const juliasDogsCorrected = juliasDogs.slice(1, -2);
+  const mergedDogs = [...juliasDogsCorrected, ...katesDogs];
+
+  mergedDogs.forEach((dogsAge, idx) => {
+    if (dogsAge >= 3) {
+      console.log(
+        `Dog number ${idx + 1} is an adult, and is ${dogsAge} years old.`
+      );
+    } else {
+      console.log(`Dog number ${idx + 1} is still a puppy!`);
+    }
+  });
+};
+
+checkDogs([3, 5, 2, 12, 7], [4, 1, 15, 8, 3]);
+checkDogs([9, 16, 6, 8, 3], [10, 5, 6, 1, 4]);
