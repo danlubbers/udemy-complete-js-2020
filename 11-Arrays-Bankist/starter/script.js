@@ -80,6 +80,16 @@ const displayMovements = function (movements) {
 
 displayMovements(account1.movements);
 
+// Balance SUM
+const calcDisplayBalance = movements => {
+  const currentBalance = movements.reduce((acc, currVal) => {
+    // console.log(acc);
+    return acc + currVal;
+  }, 0);
+  labelBalance.textContent = `${currentBalance}€`;
+};
+calcDisplayBalance(account1.movements);
+
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
 // LECTURES
@@ -162,14 +172,96 @@ const checkDogs = (juliasDogs, katesDogs) => {
 
   mergedDogs.forEach((dogsAge, idx) => {
     if (dogsAge >= 3) {
-      console.log(
-        `Dog number ${idx + 1} is an adult, and is ${dogsAge} years old.`
-      );
+      // console.log(
+      //   `Dog number ${idx + 1} is an adult, and is ${dogsAge} years old.`
+      // );
     } else {
-      console.log(`Dog number ${idx + 1} is still a puppy!`);
+      // console.log(`Dog number ${idx + 1} is still a puppy!`);
     }
   });
 };
 
 checkDogs([3, 5, 2, 12, 7], [4, 1, 15, 8, 3]);
 checkDogs([9, 16, 6, 8, 3], [10, 5, 6, 1, 4]);
+
+// Map
+const euroToUSD = 1.1;
+
+// This is more in line with Functional Programming
+const movementsUSD = movements.map(movement => movement * euroToUSD);
+// console.log(movementsUSD);
+
+// using for of loop
+const movementsUSDfor = [];
+
+for (const movement of movements) {
+  movementsUSDfor.push(movement * euroToUSD);
+}
+
+// console.log(movementsUSDfor);
+
+// Compute Usernames using forEach and Map
+const user = 'Steven Thomas Williams'; // the output we want: stw
+
+const createUsernames = accounts => {
+  accounts.forEach(acc => {
+    acc.username = acc.owner
+      .toLowerCase()
+      .split(' ')
+      .map(word => word[0])
+      .join('');
+  });
+};
+createUsernames(accounts);
+// console.log(accounts); // adds key: username to the accounts object
+
+// Filter
+const deposits = movements.filter(movement => movement > 0);
+// console.log(deposits);
+
+const depositsFor = [];
+const withdrawals = [];
+for (const movement of movements) {
+  movement > 0 ? depositsFor.push(movement) : withdrawals.push(movement);
+}
+
+// console.log(depositsFor);
+// console.log(withdrawals);
+
+// Reduce
+// console.log(movements);
+const balance = movements.reduce((acc, currVal, idx, arr) => {
+  // console.log(`Iteration ${idx}: ${acc}`);
+  return acc + currVal;
+}, 0); // initial value in "first" loop iteration
+// console.log(balance);
+
+let balance2 = 0;
+for (const movement of movements) {
+  balance2 += movement;
+}
+// console.log(balance2);
+
+// Maximum Value
+const max = movements.reduce((acc, val) => {
+  if (acc > val) return acc;
+  else return val;
+}, movements[0]);
+
+// console.log(max);
+
+// Code Challenge 2
+
+const calcAverageHumanAge = dogsAges => {
+  const dogInHumanAge = dogsAges
+    .map(age => (age <= 2 ? 2 * age : 16 + age * 4))
+    .filter(age => age >= 18);
+  console.log(dogInHumanAge);
+  return dogInHumanAge.reduce(
+    (acc, curr, idx, arr) => acc + curr / arr.length,
+    0
+  );
+};
+
+console.log(calcAverageHumanAge([5, 2, 4, 1, 15, 8, 3]));
+console.log(calcAverageHumanAge([16, 6, 10, 5, 6, 1, 4]));
