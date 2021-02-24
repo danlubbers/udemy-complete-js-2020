@@ -90,6 +90,30 @@ const calcDisplayBalance = movements => {
 };
 calcDisplayBalance(account1.movements);
 
+const calcDisplaySummary = movements => {
+  const incomes = movements
+    .filter(movement => movement > 0)
+    .reduce((acc, val) => acc + val, 0);
+
+  labelSumIn.textContent = `${incomes}€`;
+
+  const withdrawal = movements
+    .filter(movement => movement < 0)
+    .reduce((acc, val) => acc + val, 0);
+
+  labelSumOut.textContent = `${Math.abs(withdrawal)}€`;
+
+  const interest = movements
+    .filter(movement => movement > 0) // filter greater than 0
+    .map(deposit => (deposit * 1.2) / 100) // calculate interest
+    .filter(interest => interest >= 1) // filter interest greater than 1 'bank policy'
+    .reduce((acc, val) => acc + val, 0); // sum interest
+
+  labelSumInterest.textContent = `${Math.abs(interest)}€`;
+};
+
+calcDisplaySummary(account1.movements);
+
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
 // LECTURES
@@ -250,18 +274,23 @@ const max = movements.reduce((acc, val) => {
 
 // console.log(max);
 
-// Code Challenge 2
+// Code Challenge 2 & 3
 
 const calcAverageHumanAge = dogsAges => {
-  const dogInHumanAge = dogsAges
+  return dogsAges
     .map(age => (age <= 2 ? 2 * age : 16 + age * 4))
-    .filter(age => age >= 18);
-  console.log(dogInHumanAge);
-  return dogInHumanAge.reduce(
-    (acc, curr, idx, arr) => acc + curr / arr.length,
-    0
-  );
+    .filter(age => age >= 18)
+    .reduce((acc, curr, idx, arr) => acc + curr / arr.length, 0);
 };
 
-console.log(calcAverageHumanAge([5, 2, 4, 1, 15, 8, 3]));
-console.log(calcAverageHumanAge([16, 6, 10, 5, 6, 1, 4]));
+// console.log(calcAverageHumanAge([5, 2, 4, 1, 15, 8, 3]));
+// console.log(calcAverageHumanAge([16, 6, 10, 5, 6, 1, 4]));
+
+// Chaining
+
+const totalDepositsInUSD = movements
+  .filter(movement => movement > 0)
+  .map(movement => movement * euroToUSD)
+  .reduce((acc, val) => acc + val, 0);
+
+// console.log(totalDepositsInUSD);
