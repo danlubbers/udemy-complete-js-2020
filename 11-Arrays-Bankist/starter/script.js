@@ -78,8 +78,6 @@ const displayMovements = function (movements) {
   });
 };
 
-displayMovements(account1.movements);
-
 // Balance SUM
 const calcDisplayBalance = movements => {
   const currentBalance = movements.reduce((acc, currVal) => {
@@ -88,31 +86,65 @@ const calcDisplayBalance = movements => {
   }, 0);
   labelBalance.textContent = `${currentBalance}€`;
 };
-calcDisplayBalance(account1.movements);
 
-const calcDisplaySummary = movements => {
-  const incomes = movements
+const calcDisplaySummary = account => {
+  const incomes = account.movements
     .filter(movement => movement > 0)
     .reduce((acc, val) => acc + val, 0);
 
   labelSumIn.textContent = `${incomes}€`;
 
-  const withdrawal = movements
+  const withdrawal = account.movements
     .filter(movement => movement < 0)
     .reduce((acc, val) => acc + val, 0);
 
   labelSumOut.textContent = `${Math.abs(withdrawal)}€`;
 
-  const interest = movements
+  const interest = account.movements
     .filter(movement => movement > 0) // filter greater than 0
-    .map(deposit => (deposit * 1.2) / 100) // calculate interest
+    .map(deposit => (deposit * account.interestRate) / 100) // calculate interest
     .filter(interest => interest >= 1) // filter interest greater than 1 'bank policy'
     .reduce((acc, val) => acc + val, 0); // sum interest
 
   labelSumInterest.textContent = `${Math.abs(interest)}€`;
 };
 
-calcDisplaySummary(account1.movements);
+// Event Handler
+
+let currentUser;
+
+btnLogin.addEventListener('click', e => {
+  e.preventDefault(); // prevent form from submitting
+  console.log('hit');
+
+  currentUser = accounts.find(
+    account => account.username === inputLoginUsername.value
+  );
+
+  if (currentUser?.pin === +inputLoginPin.value) {
+    // Display UI Welcome message
+    labelWelcome.textContent = `Welcome back ${
+      currentUser.owner.split(' ')[0]
+    }`;
+
+    containerApp.style.opacity = 100;
+
+    // Clear input fields
+    inputLoginUsername.value = inputLoginPin.value = '';
+    inputLoginPin.blur(); // gets rid of blinking line. Field loses focus
+
+    // Display Movements
+    displayMovements(currentUser.movements);
+
+    // Display Balance
+    calcDisplayBalance(currentUser.movements);
+
+    // Display Summary
+    calcDisplaySummary(currentUser);
+  } else {
+    console.log('No User Found!');
+  }
+});
 
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
@@ -294,3 +326,17 @@ const totalDepositsInUSD = movements
   .reduce((acc, val) => acc + val, 0);
 
 // console.log(totalDepositsInUSD);
+
+// Find Method - retreive first element of the array that satisfies the condition
+const firstWithdrawal = movements.find(movement => movement < 0);
+// console.log(firstWithdrawal);
+
+const account = accounts.find(account => account.owner === 'Jessica Davis');
+// console.log(account);
+
+// Using For Of Loop
+let accountOwner = {};
+for (const account of accounts) {
+  if (account.owner === 'Jessica Davis') accountOwner = account;
+}
+// console.log(accountOwner);
