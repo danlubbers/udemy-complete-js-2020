@@ -78,13 +78,24 @@ const displayMovements = function (movements) {
   });
 };
 
+const updateUI = currentAccount => {
+  // Display Movements
+  displayMovements(currentUser.movements);
+
+  // Display Balance
+  calcDisplayBalance(currentUser);
+
+  // Display Summary
+  calcDisplaySummary(currentUser);
+};
+
 // Balance SUM
-const calcDisplayBalance = movements => {
-  const currentBalance = movements.reduce((acc, currVal) => {
+const calcDisplayBalance = account => {
+  account.balance = account.movements.reduce((acc, currVal) => {
     // console.log(acc);
     return acc + currVal;
   }, 0);
-  labelBalance.textContent = `${currentBalance}€`;
+  labelBalance.textContent = `${account.balance}€`;
 };
 
 const calcDisplaySummary = account => {
@@ -133,16 +144,31 @@ btnLogin.addEventListener('click', e => {
     inputLoginUsername.value = inputLoginPin.value = '';
     inputLoginPin.blur(); // gets rid of blinking line. Field loses focus
 
-    // Display Movements
-    displayMovements(currentUser.movements);
-
-    // Display Balance
-    calcDisplayBalance(currentUser.movements);
-
-    // Display Summary
-    calcDisplaySummary(currentUser);
+    updateUI(currentUser);
   } else {
     console.log('No User Found!');
+  }
+});
+
+btnTransfer.addEventListener('click', e => {
+  e.preventDefault();
+  const amount = +inputTransferAmount.value;
+  const receiver = accounts.find(
+    account => account.username === inputTransferTo.value
+  );
+
+  inputTransferAmount.value = inputTransferTo.value = '';
+
+  if (
+    amount > 0 &&
+    receiver &&
+    currentUser.balance >= amount &&
+    receiver?.username !== currentUser.username
+  ) {
+    currentUser.movements.push(-amount);
+    receiver.movements.push(amount);
+
+    updateUI(currentUser);
   }
 });
 
