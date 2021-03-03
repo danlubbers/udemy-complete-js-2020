@@ -603,3 +603,67 @@ const dogsSorted = dogs.slice().sort((a, b) => {
   return a.recommendedFood - b.recommendedFood;
 });
 console.log(dogsSorted);
+
+/*** ARRAY METHODS PRACTICE ***/
+
+console.log(accounts);
+
+// 1.
+const bankDepositsSum = accounts
+  .flatMap(acc => acc.movements)
+  .filter(mov => mov > 0)
+  .reduce((acc, val) => acc + val, 0);
+console.log(bankDepositsSum);
+
+// 2.
+const numDeposits1000 = accounts
+  .flatMap(acc => acc.movements)
+  .filter(mov => mov >= 1000).length;
+console.log(numDeposits1000);
+
+// Same thing using reduce
+const numDeposits1000Reduced = accounts
+  .flatMap(acc => acc.movements)
+  .reduce((acc, cur) => (cur >= 1000 ? ++acc : acc), 0);
+console.log(numDeposits1000Reduced);
+
+// Prefixed ++ operator
+let a = 10;
+console.log(a++); // returns previous value / old value
+console.log(a);
+console.log(++a); // returns new current value
+console.log(a);
+
+// 3.
+
+const sums = accounts
+  .flatMap(acc => acc.movements)
+  .reduce(
+    (acc, cur) => {
+      cur > 0 ? (acc.deposits += cur) : (acc.withdrawals += cur);
+      // acc[cur > 0 ? 'deposits' : 'withdrawals'] += cur; // different way to do same thing above
+      return acc;
+    },
+    { deposits: 0, withdrawals: 0 }
+  );
+
+console.log(sums);
+
+// 4.
+// this is a nice title => This Is a Nice Title
+const convertTitleCase = title => {
+  const exceptions = ['a', 'an', 'and', 'the', 'but', 'or', 'on', 'in', 'with'];
+  const capitalize = str => str[0].toUpperCase() + str.slice(1);
+
+  const titleCase = title
+    .toLowerCase()
+    .split(' ')
+    .map(word => (exceptions.includes(word) ? word : capitalize(word)))
+    .join(' ');
+
+  return capitalize(titleCase);
+};
+
+console.log(convertTitleCase('this is a nice title'));
+console.log(convertTitleCase('this is a LONG title but not too long'));
+console.log(convertTitleCase('and here is another title with an EXAMPLE'));
