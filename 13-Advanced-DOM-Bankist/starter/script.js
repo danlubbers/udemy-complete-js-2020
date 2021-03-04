@@ -216,11 +216,11 @@ allSections.forEach(section => {
 
 /*** LAZY LOADING IMAGES ***/
 const imgTargets = document.querySelectorAll('img[data-src]');
-console.log(imgTargets);
+// console.log(imgTargets);
 
 const loadImg = (entries, observer) => {
   const [entry] = entries;
-  console.log(entry);
+  // console.log(entry);
 
   if (!entry.isIntersecting) return;
   // Replace src with data-src
@@ -467,4 +467,18 @@ const randomColor = () =>
 
 // [...h1.parentElement.children].forEach(el => {
 //   if (el !== h1) el.style.transform = 'scale(0.5)';
+// });
+
+/*** LIFECYCLE DOME EVENTS ***/
+document.addEventListener('DOMContentLoaded', e =>
+  console.log('HTML parsed and dom tree built', e)
+);
+
+window.addEventListener('load', e => console.log('Page fully loaded', e));
+
+// Asks if you want to leave the site
+// window.addEventListener('beforeunload', e => {
+//   e.preventDefault();
+//   console.log(e);
+//   e.returnValue = '';
 // });
