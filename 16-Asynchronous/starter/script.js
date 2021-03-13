@@ -165,4 +165,143 @@ const whereAmI = (lat, lng) => {
     .catch(err => console.error(err));
 };
 
-whereAmI(52.508, 13.381);
+// whereAmI(52.508, 13.381);
+
+/*** EVENT LOOP PRACTICE ***/
+// console.log('test start');
+// setTimeout(() => console.log('0 sec timer'), 0);
+// Promise.resolve('Resolved Promise 1').then(res => console.log(res)); // this resolves first because of microtask queue. Has priority over callback queue ( setTimeout )
+
+// All microtasks have priority - look at console.logs in browser
+Promise.resolve('Promise 2').then(res => {
+  // for (let i = 0; i < 1000000000; i++) {}
+  // console.log(res);
+});
+// console.log('test end');
+
+/*** BUILDING A SIMPLE PROMISE ***/
+
+// const lotteryPromise = new Promise((resolve, reject) => {
+//   console.log('Lottery in progress...');
+
+//   // setTimeout simulates asynchronous code
+//   setTimeout(() => {
+//     if (Math.random() >= 0.5) {
+//       resolve('You WIN!!!');
+//     } else {
+//       reject(new Error('LOSER!!!'));
+//     }
+//   }, 2000);
+// });
+
+// Consume Promise
+// lotteryPromise.then(res => console.log(res)).catch(err => console.error(err));
+
+// Promisifying setTimeout
+const wait = seconds => {
+  return new Promise(resolve => setTimeout(resolve, seconds * 1000));
+};
+
+// Chaining: No Callback Hell!
+// wait(2)
+//   .then(() => {
+//     console.log('1 second passed.');
+//     return wait(1);
+//   })
+//   .then(() => {
+//     console.log('2 seconds passed.');
+//     return wait(1);
+//   })
+//   .then(() => {
+//     console.log('3 seconds passed.');
+//     return wait(1);
+//   })
+//   .then(() => console.log('4 seconds passed.'));
+
+// resolves immediately
+// Promise.resolve('Immediate').then(res => console.log(res));
+// rejects immediately
+// Promise.reject(new Error('Rejected')).catch(err => console.error(err));
+
+/*** PROMISIFYING GEOLOCATION ***/
+
+const getPosition = () => {
+  return new Promise((resolve, reject) => {
+    // navigator.geolocation.getCurrentPosition(
+    //   position => resolve(position),
+    //   err => reject(err)
+    // );
+
+    // This is the same as what is commented above
+    navigator.geolocation.getCurrentPosition(resolve, reject);
+  });
+};
+
+// getPosition().then(res => console.log(res));
+
+const whereAmI2 = () => {
+  getPosition()
+    .then(pos => {
+      const { latitude: lat, longitude: lng } = pos.coords;
+
+      return fetch(`https://geocode.xyz/${lat},${lng}?geoit=json`);
+    })
+    .then(res => {
+      if (!res.ok) {
+        throw new Error(`Problem with geocoding ${res.status}`);
+      }
+      return res.json();
+    })
+    .then(data => {
+      console.log(`You are in ${data.city}, ${data.country}`);
+      getCountryData(data.country);
+    })
+    .catch(err => console.error(err));
+};
+
+// whereAmI2();
+
+// Code Challenge 2
+
+const waitChallenge = seconds => {
+  return new Promise(resolve => setTimeout(resolve, seconds * 1000));
+};
+
+const imageContainer = document.querySelector('.images');
+
+const createImage = imgPath => {
+  return new Promise((resolve, reject) => {
+    const image = document.createElement('img');
+    image.src = imgPath;
+
+    image.addEventListener('load', () => {
+      imageContainer.append(image);
+      resolve(image);
+    });
+    image.addEventListener('error', () => {
+      reject(new Error('Image not found!'));
+    });
+  });
+};
+
+let currentImg;
+
+createImage('/img/img-1.jpg')
+  .then(img => {
+    currentImg = img;
+    console.log('Image 1 loaded!');
+    return waitChallenge(2);
+  })
+  .then(() => {
+    currentImg.style.display = 'none';
+    return createImage('img/img-2.jpg');
+  })
+  .then(img => {
+    currentImg = img;
+    console.log('Image 2 loaded!');
+    return waitChallenge(2);
+  })
+  .then(() => {
+    currentImg.style.display = 'none';
+  })
+  .catch(err => console.error(err));
