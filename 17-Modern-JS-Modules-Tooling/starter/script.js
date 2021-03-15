@@ -90,3 +90,9 @@ console.log(stateDeepClone); // did "not" mutate loggedIn to false
 // only for parcel: will not reload the page on save
 // State is maintained when we save
 if (module.hot) module.hot.accept();
+
+// polyfill methods like .filter .map, Promises, etc
+import 'core-js/stable';
+
+// polyfilling async functions
+import 'regenerator-runtime/runtime';
