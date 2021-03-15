@@ -60,3 +60,33 @@ console.log(shoppingCart2.shippingCost); // undefined: not returned
 
 // Import
 // const { addToCart} = require('./shoppingCart.js')
+
+/*** NPM ***/
+// import cloneDeep from './node_modules/lodash-es/cloneDeep.js';
+import cloneDeep from 'lodash-es'; // better way to import
+
+const state = {
+  cart: [
+    {
+      product: 'bread',
+      quantity: 5,
+    },
+    {
+      product: 'pizza',
+      quantity: 3,
+    },
+  ],
+  user: { loggedIn: true },
+};
+
+const stateClone = Object.assign({}, state);
+const stateDeepClone = cloneDeep(state);
+console.log(stateClone);
+state.user.loggedIn = false;
+console.log(stateClone);
+
+console.log(stateDeepClone); // did "not" mutate loggedIn to false
+
+// only for parcel: will not reload the page on save
+// State is maintained when we save
+if (module.hot) module.hot.accept();
