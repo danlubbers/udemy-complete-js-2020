@@ -449,6 +449,10 @@ var model = _interopRequireWildcard(require("./model.js"));
 
 var _recipeView = _interopRequireDefault(require("./views/recipeView.js"));
 
+var _searchView = _interopRequireDefault(require("./views/searchView.js"));
+
+var _resultsView = _interopRequireDefault(require("./views/resultsView.js"));
+
 require("regenerator-runtime");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -459,8 +463,11 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 // for older browsers - polyfill everything except async
 // for older browsers - polyfill asyn/await
-// https://forkify-api.herokuapp.com/v2
-///////////////////////////////////////
+// coming from parcel
+if (module.hot) {
+  module.hot.accept();
+}
+
 const controlRecipes = async function () {
   try {
     const id = window.location.hash.slice(1);
@@ -477,13 +484,32 @@ const controlRecipes = async function () {
   }
 };
 
+const controlSearchResults = async function () {
+  // 1. Get search query
+  try {
+    _resultsView.default.renderSpinner();
+
+    const query = _searchView.default.getQuery();
+
+    if (!query) return; // 2. Load search results
+
+    await model.loadSearchResults(query); // 3. Render results
+
+    _resultsView.default.render(model.state.search.results);
+  } catch (err) {
+    console.error(err);
+  }
+};
+
 const init = function () {
   // Subscriber
   _recipeView.default.addHandlerRender(controlRecipes);
+
+  _searchView.default.addHandlerSearch(controlSearchResults);
 };
 
 init();
-},{"core-js/modules/web.immediate.js":"140df4f8e97a45c53c66fead1f5a9e92","core-js/modules/web.url.js":"a66c25e402880ea6b966ee8ece30b6df","core-js/modules/web.url.to-json.js":"6357c5a053a36e38c0e24243e550dd86","core-js/modules/web.url-search-params.js":"2494aebefd4ca447de0ef4cfdd47509e","regenerator-runtime":"e155e0d3930b156f86c48e8d05522b16","./model.js":"47ecf14258f00bde4534498b74632124","./views/recipeView.js":"7a075e00040333dc06667640b8596934"}],"140df4f8e97a45c53c66fead1f5a9e92":[function(require,module,exports) {
+},{"core-js/modules/web.immediate.js":"140df4f8e97a45c53c66fead1f5a9e92","core-js/modules/web.url.js":"a66c25e402880ea6b966ee8ece30b6df","core-js/modules/web.url.to-json.js":"6357c5a053a36e38c0e24243e550dd86","core-js/modules/web.url-search-params.js":"2494aebefd4ca447de0ef4cfdd47509e","regenerator-runtime":"e155e0d3930b156f86c48e8d05522b16","./model.js":"47ecf14258f00bde4534498b74632124","./views/recipeView.js":"7a075e00040333dc06667640b8596934","./views/searchView.js":"38bdde45f47aa361e4f1f15b2f6f5828","./views/resultsView.js":"deb432cb91590e2fbbc1a0ba70c55402"}],"140df4f8e97a45c53c66fead1f5a9e92":[function(require,module,exports) {
 var $ = require('../internals/export');
 
 var global = require('../internals/global');
@@ -4561,14 +4587,18 @@ try {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.loadRecipe = exports.state = void 0;
+exports.loadSearchResults = exports.loadRecipe = exports.state = void 0;
 
 var _config = require("./config.js");
 
 var _helpers = require("./helpers.js");
 
 const state = {
-  recipe: {}
+  recipe: {},
+  search: {
+    query: '',
+    results: []
+  }
 }; // Changes state object. Does not return anything.
 // Not a pure function as it manipulates state which is outside of the function
 
@@ -4577,7 +4607,7 @@ exports.state = state;
 const loadRecipe = async function (id) {
   try {
     // 1. Loading recipe
-    const data = await (0, _helpers.getJSON)(`${_config.API_URL}/${id}`);
+    const data = await (0, _helpers.getJSON)(`${_config.API_URL}${id}`);
     const {
       recipe
     } = data.data;
@@ -4590,14 +4620,36 @@ const loadRecipe = async function (id) {
       servings: recipe.servings,
       cookingTime: recipe.cooking_time,
       ingredients: recipe.ingredients
-    };
-    console.log(state.recipe);
+    }; // console.log(state.recipe);
   } catch (err) {
     throw err;
   }
 };
 
 exports.loadRecipe = loadRecipe;
+
+const loadSearchResults = async function (query) {
+  try {
+    state.search.query = query;
+    const data = await (0, _helpers.getJSON)(`${_config.API_URL}?search=${query}`);
+    const {
+      recipes
+    } = data.data;
+    state.search.results = recipes.map(recipe => {
+      return {
+        id: recipe.id,
+        title: recipe.title,
+        publisher: recipe.publisher,
+        image: recipe.image_url
+      };
+    });
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
+};
+
+exports.loadSearchResults = loadSearchResults;
 },{"./config.js":"26812f7d6f7d8fabc379365ccfa03163","./helpers.js":"b1ca0bdc3f3f9e95347882646f46b1d4"}],"26812f7d6f7d8fabc379365ccfa03163":[function(require,module,exports) {
 "use strict";
 
@@ -4605,7 +4657,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.TIMEOUT_SEC = exports.API_URL = void 0;
-const API_URL = `https://forkify-api.herokuapp.com/api/v2/recipes`;
+const API_URL = `https://forkify-api.herokuapp.com/api/v2/recipes/`;
 exports.API_URL = API_URL;
 const TIMEOUT_SEC = 10;
 exports.TIMEOUT_SEC = TIMEOUT_SEC;
@@ -4648,143 +4700,39 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
+var _view = _interopRequireDefault(require("./view.js"));
+
 var _icons = _interopRequireDefault(require("url:../../img/icons.svg"));
 
 var _fractional = require("fractional");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _classPrivateFieldGet(receiver, privateMap) { var descriptor = _classExtractFieldDescriptor(receiver, privateMap, "get"); return _classApplyDescriptorGet(receiver, descriptor); }
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
-function _classApplyDescriptorGet(receiver, descriptor) { if (descriptor.get) { return descriptor.get.call(receiver); } return descriptor.value; }
+class RecipeView extends _view.default {
+  constructor(...args) {
+    super(...args);
 
-function _classPrivateMethodGet(receiver, privateSet, fn) { if (!privateSet.has(receiver)) { throw new TypeError("attempted to get private field on non-instance"); } return fn; }
+    _defineProperty(this, "_parentElement", document.querySelector('.recipe'));
 
-function _classPrivateFieldSet(receiver, privateMap, value) { var descriptor = _classExtractFieldDescriptor(receiver, privateMap, "set"); _classApplyDescriptorSet(receiver, descriptor, value); return value; }
+    _defineProperty(this, "_errorMessage", `We could not find that recipe. Please try another one!`);
 
-function _classExtractFieldDescriptor(receiver, privateMap, action) { if (!privateMap.has(receiver)) { throw new TypeError("attempted to " + action + " private field on non-instance"); } return privateMap.get(receiver); }
-
-function _classApplyDescriptorSet(receiver, descriptor, value) { if (descriptor.set) { descriptor.set.call(receiver, value); } else { if (!descriptor.writable) { throw new TypeError("attempted to set read only private field"); } descriptor.value = value; } }
-
-var _parentElement = new WeakMap();
-
-var _data = new WeakMap();
-
-var _errorMessage = new WeakMap();
-
-var _successMessage = new WeakMap();
-
-var _clear = new WeakSet();
-
-var _generateMarkup = new WeakSet();
-
-var _generateMarkupIngredient = new WeakSet();
-
-class RecipeView {
-  constructor() {
-    _generateMarkupIngredient.add(this);
-
-    _generateMarkup.add(this);
-
-    _clear.add(this);
-
-    _parentElement.set(this, {
-      writable: true,
-      value: document.querySelector('.recipe')
-    });
-
-    _data.set(this, {
-      writable: true,
-      value: void 0
-    });
-
-    _errorMessage.set(this, {
-      writable: true,
-      value: `We could not find that recipe. Please try another one!`
-    });
-
-    _successMessage.set(this, {
-      writable: true,
-      value: ''
-    });
+    _defineProperty(this, "_successMessage", '');
   }
 
-  render(data) {
-    _classPrivateFieldSet(this, _data, data);
-
-    const markup = _classPrivateMethodGet(this, _generateMarkup, _generateMarkup2).call(this);
-
-    _classPrivateMethodGet(this, _clear, _clear2).call(this);
-
-    _classPrivateFieldGet(this, _parentElement).insertAdjacentHTML('afterbegin', markup);
-  }
-
-  renderSpinner() {
-    const markup = `
-      <div class="spinner">
-        <svg>
-          <use href="${_icons.default}#icon-loader"></use>
-        </svg>
-      </div>
-    `;
-
-    _classPrivateMethodGet(this, _clear, _clear2).call(this);
-
-    _classPrivateFieldGet(this, _parentElement).insertAdjacentHTML('afterbegin', markup);
-  }
-
-  renderError(errMsg = _classPrivateFieldGet(this, _errorMessage)) {
-    const markup = `
-      <div class="error">
-        <div>
-          <svg>
-            <use href="${_icons.default}#icon-alert-triangle"></use>
-          </svg>
-        </div>
-        <p>${errMsg}</p>
-      </div>
-    `;
-
-    _classPrivateMethodGet(this, _clear, _clear2).call(this);
-
-    _classPrivateFieldGet(this, _parentElement).insertAdjacentHTML('afterbegin', markup);
-  }
-
-  renderSuccess(successMessage) {
-    const markup = `
-      <div class="message">
-        <div>
-          <svg>
-            <use href="${_icons.default}#icon-smile"></use>
-          </svg>
-        </div>
-        <p>${successMessage}</p>
-      </div>
-    `;
-
-    _classPrivateMethodGet(this, _clear, _clear2).call(this);
-
-    _classPrivateFieldGet(this, _parentElement).insertAdjacentHTML('afterbegin', markup);
-  } // This method is the 'publisher' and needs access to the 'subscriber'
-
-
+  // This method is the 'publisher' and needs access to the 'subscriber'
   addHandlerRender(handler) {
     // This is the same as above, but using DRY principles and looping
     ['hashchange', 'load'].forEach(event => window.addEventListener(event, handler));
   }
 
-}
-
-function _clear2() {
-  _classPrivateFieldGet(this, _parentElement).innerHtml = ''; // gets rid of "start by searching" message
-}
-
-function _generateMarkup2() {
-  return `
+  _generateMarkup() {
+    return `
       <figure class="recipe__fig">
-        <img src="${_classPrivateFieldGet(this, _data).image}" alt="${_classPrivateFieldGet(this, _data).title}" class="recipe__img" />
+        <img src="${this._data.image}" alt="${this._data.title}" class="recipe__img" />
         <h1 class="recipe__title">
-          <span>${_classPrivateFieldGet(this, _data).title}</span>
+          <span>${this._data.title}</span>
         </h1>
       </figure>
 
@@ -4793,14 +4741,14 @@ function _generateMarkup2() {
           <svg class="recipe__info-icon">
             <use href="${_icons.default}#icon-clock"></use>
           </svg>
-          <span class="recipe__info-data recipe__info-data--minutes">${_classPrivateFieldGet(this, _data).cookingTime}</span>
+          <span class="recipe__info-data recipe__info-data--minutes">${this._data.cookingTime}</span>
           <span class="recipe__info-text">minutes</span>
         </div>
         <div class="recipe__info">
           <svg class="recipe__info-icon">
             <use href="${_icons.default}#icon-users"></use>
           </svg>
-          <span class="recipe__info-data recipe__info-data--people">${_classPrivateFieldGet(this, _data).servings}</span>
+          <span class="recipe__info-data recipe__info-data--people">${this._data.servings}</span>
           <span class="recipe__info-text">servings</span>
 
           <div class="recipe__info-buttons">
@@ -4818,9 +4766,7 @@ function _generateMarkup2() {
         </div>
 
         <div class="recipe__user-generated">
-          <svg>
-            <use href="${_icons.default}#icon-user"></use>
-          </svg>
+         
         </div>
         <button class="btn--round">
           <svg class="">
@@ -4832,7 +4778,7 @@ function _generateMarkup2() {
       <div class="recipe__ingredients">
         <h2 class="heading--2">Recipe ingredients</h2>
         <ul class="recipe__ingredient-list">
-        ${_classPrivateFieldGet(this, _data).ingredients.map(_classPrivateMethodGet(this, _generateMarkupIngredient, _generateMarkupIngredient2)).join('')}
+        ${this._data.ingredients.map(this._generateMarkupIngredient).join('')}
         </ul>
       </div>
 
@@ -4840,12 +4786,12 @@ function _generateMarkup2() {
         <h2 class="heading--2">How to cook it</h2>
         <p class="recipe__directions-text">
           This recipe was carefully designed and tested by
-          <span class="recipe__publisher">${_classPrivateFieldGet(this, _data).publisher}</span>. Please check out
+          <span class="recipe__publisher">${this._data.publisher}</span>. Please check out
           directions at their website.
         </p>
         <a
           class="btn--small recipe__btn"
-          href="${_classPrivateFieldGet(this, _data).sourceURL}"
+          href="${this._data.sourceURL}"
           target="_blank"
         >
           <span>Directions</span>
@@ -4855,10 +4801,10 @@ function _generateMarkup2() {
         </a>
       </div>
     `;
-}
+  }
 
-function _generateMarkupIngredient2(ing) {
-  return `
+  _generateMarkupIngredient(ing) {
+    return `
         <li class="recipe__ingredient">
           <svg class="recipe__icon">
             <use href="${_icons.default}#icon-check"></use>
@@ -4869,13 +4815,15 @@ function _generateMarkupIngredient2(ing) {
             ${ing.description}
           </div>
         </li>`;
+  }
+
 }
 
 var _default = new RecipeView(); // export as object, not the class
 
 
 exports.default = _default;
-},{"url:../../img/icons.svg":"54723579b5fec6060686b051512cd431","fractional":"ddbc156a7c16e105c8df04e9fdec967d"}],"54723579b5fec6060686b051512cd431":[function(require,module,exports) {
+},{"url:../../img/icons.svg":"54723579b5fec6060686b051512cd431","fractional":"ddbc156a7c16e105c8df04e9fdec967d","./view.js":"907482bc26116fa760693a41e8859ac9"}],"54723579b5fec6060686b051512cd431":[function(require,module,exports) {
 module.exports = require('./bundle-url').getBundleURL() + require('./relative-path')("7f5f54480370ff81", "20750ef00137f071");
 },{"./bundle-url":"2146da1905b95151ed14d455c784e7b7","./relative-path":"1b9943ef25c7bbdf0dd1b9fa91880a6c"}],"2146da1905b95151ed14d455c784e7b7":[function(require,module,exports) {
 "use strict";
@@ -5357,6 +5305,188 @@ Fraction.primeFactors = function(n)
 
 module.exports.Fraction = Fraction
 
-},{}]},{},["19135baa828ba24782eb17cc08e9142d","83c8fc3340e62496516db8800d01cd31","c5843767b0bc0784c718518d67d386e0"], null)
+},{}],"907482bc26116fa760693a41e8859ac9":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _icons = _interopRequireDefault(require("url:../../img/icons.svg"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+// Parcel 2 images
+// export class right away because we will not need to create any instance of it
+// This will only be used as a Parent Class to all other classes to inherit duplicate code
+class View {
+  constructor() {
+    _defineProperty(this, "_data", void 0);
+  }
+
+  render(data) {
+    if (!data || Array.isArray(data) && data.length === 0) return this.renderError();
+    this._data = data;
+
+    const markup = this._generateMarkup();
+
+    this._clear();
+
+    this._parentElement.insertAdjacentHTML('afterbegin', markup);
+  }
+
+  _clear() {
+    this._parentElement.innerHTML = ''; // gets rid of "start by searching" message
+  }
+
+  renderSpinner() {
+    const markup = `
+      <div class="spinner">
+        <svg>
+          <use href="${_icons.default}#icon-loader"></use>
+        </svg>
+      </div>
+    `;
+
+    this._clear();
+
+    this._parentElement.insertAdjacentHTML('afterbegin', markup);
+  }
+
+  renderError(errMsg = this._errorMessage) {
+    const markup = `
+      <div class="error">
+        <div>
+          <svg>
+            <use href="${_icons.default}#icon-alert-triangle"></use>
+          </svg>
+        </div>
+        <p>${errMsg}</p>
+      </div>
+    `;
+
+    this._clear();
+
+    this._parentElement.insertAdjacentHTML('afterbegin', markup);
+  }
+
+  renderSuccess(successMessage) {
+    const markup = `
+      <div class="message">
+        <div>
+          <svg>
+            <use href="${_icons.default}#icon-smile"></use>
+          </svg>
+        </div>
+        <p>${successMessage}</p>
+      </div>
+    `;
+
+    this._clear();
+
+    this._parentElement.insertAdjacentHTML('afterbegin', markup);
+  }
+
+}
+
+exports.default = View;
+},{"url:../../img/icons.svg":"54723579b5fec6060686b051512cd431"}],"38bdde45f47aa361e4f1f15b2f6f5828":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+class SearchView {
+  constructor() {
+    _defineProperty(this, "_parentEl", document.querySelector('.search'));
+  }
+
+  getQuery() {
+    const query = this._parentEl.querySelector('.search__field').value;
+
+    this._clearInput();
+
+    return query;
+  }
+
+  _clearInput() {
+    this._parentEl.querySelector('.search__field').value = '';
+  }
+
+  addHandlerSearch(handler) {
+    this._parentEl.addEventListener('submit', e => {
+      e.preventDefault();
+      handler(); // this calls controlSearchResults() function
+    });
+  }
+
+}
+
+var _default = new SearchView();
+
+exports.default = _default;
+},{}],"deb432cb91590e2fbbc1a0ba70c55402":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _view = _interopRequireDefault(require("./view.js"));
+
+var _icons = _interopRequireDefault(require("url:../../img/icons.svg"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+// Parcel 2
+class ResultsView extends _view.default {
+  constructor(...args) {
+    super(...args);
+
+    _defineProperty(this, "_parentElement", document.querySelector('.results'));
+
+    _defineProperty(this, "_errorMessage", `No recipes found for your query! Please try another one!`);
+
+    _defineProperty(this, "_successMessage", '');
+  }
+
+  _generateMarkup() {
+    return this._data.map(this._generateMarkupPreview).join('');
+  }
+
+  _generateMarkupPreview(result) {
+    return `
+    <li class="preview">
+      <a class="preview__link" href="#${result.id}">
+        <figure class="preview__fig">
+          <img src="${result.image}" alt="${result.title}" />
+        </figure>
+        <div class="preview__data">
+          <h4 class="preview__title">
+            ${result.title}
+          </h4>
+          <p class="preview__publisher">${result.publisher}</p>         
+        </div>
+      </a>
+    </li>
+  `;
+  }
+
+}
+
+var _default = new ResultsView();
+
+exports.default = _default;
+},{"./view.js":"907482bc26116fa760693a41e8859ac9","url:../../img/icons.svg":"54723579b5fec6060686b051512cd431"}]},{},["19135baa828ba24782eb17cc08e9142d","83c8fc3340e62496516db8800d01cd31","c5843767b0bc0784c718518d67d386e0"], null)
 
 //# sourceMappingURL=controller.2358702e.js.map

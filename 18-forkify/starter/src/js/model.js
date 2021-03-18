@@ -3,6 +3,10 @@ import { getJSON } from './helpers.js';
 
 export const state = {
   recipe: {},
+  search: {
+    query: '',
+    results: [],
+  },
 };
 
 // Changes state object. Does not return anything.
@@ -10,7 +14,7 @@ export const state = {
 export const loadRecipe = async function (id) {
   try {
     // 1. Loading recipe
-    const data = await getJSON(`${API_URL}/${id}`);
+    const data = await getJSON(`${API_URL}${id}`);
 
     const { recipe } = data.data;
     state.recipe = {
@@ -24,8 +28,28 @@ export const loadRecipe = async function (id) {
       ingredients: recipe.ingredients,
     };
 
-    console.log(state.recipe);
+    // console.log(state.recipe);
   } catch (err) {
+    throw err;
+  }
+};
+
+export const loadSearchResults = async function (query) {
+  try {
+    state.search.query = query;
+    const data = await getJSON(`${API_URL}?search=${query}`);
+
+    const { recipes } = data.data;
+    state.search.results = recipes.map(recipe => {
+      return {
+        id: recipe.id,
+        title: recipe.title,
+        publisher: recipe.publisher,
+        image: recipe.image_url,
+      };
+    });
+  } catch (err) {
+    console.error(err);
     throw err;
   }
 };
