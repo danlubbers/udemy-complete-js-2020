@@ -453,6 +453,8 @@ var _searchView = _interopRequireDefault(require("./views/searchView.js"));
 
 var _resultsView = _interopRequireDefault(require("./views/resultsView.js"));
 
+var _paginationView = _interopRequireDefault(require("./views/paginationView.js"));
+
 require("regenerator-runtime");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -494,11 +496,23 @@ const controlSearchResults = async function () {
     if (!query) return; // 2. Load search results
 
     await model.loadSearchResults(query); // 3. Render results
+    // resultsView.render(model.state.search.results);
 
-    _resultsView.default.render(model.state.search.results);
+    _resultsView.default.render(model.getSearchResultsPage(3)); // 4. Render initial pagination buttons
+
+
+    _paginationView.default.render(model.state.search);
   } catch (err) {
     console.error(err);
   }
+};
+
+const controlPagination = function (goToPage) {
+  // 3. Render NEW results
+  _resultsView.default.render(model.getSearchResultsPage(goToPage)); // 4. Render NEW initial pagination buttons
+
+
+  _paginationView.default.render(model.state.search);
 };
 
 const init = function () {
@@ -506,10 +520,12 @@ const init = function () {
   _recipeView.default.addHandlerRender(controlRecipes);
 
   _searchView.default.addHandlerSearch(controlSearchResults);
+
+  _paginationView.default.addHandlerClick(controlPagination);
 };
 
 init();
-},{"core-js/modules/web.immediate.js":"140df4f8e97a45c53c66fead1f5a9e92","core-js/modules/web.url.js":"a66c25e402880ea6b966ee8ece30b6df","core-js/modules/web.url.to-json.js":"6357c5a053a36e38c0e24243e550dd86","core-js/modules/web.url-search-params.js":"2494aebefd4ca447de0ef4cfdd47509e","regenerator-runtime":"e155e0d3930b156f86c48e8d05522b16","./model.js":"47ecf14258f00bde4534498b74632124","./views/recipeView.js":"7a075e00040333dc06667640b8596934","./views/searchView.js":"38bdde45f47aa361e4f1f15b2f6f5828","./views/resultsView.js":"deb432cb91590e2fbbc1a0ba70c55402"}],"140df4f8e97a45c53c66fead1f5a9e92":[function(require,module,exports) {
+},{"core-js/modules/web.immediate.js":"140df4f8e97a45c53c66fead1f5a9e92","core-js/modules/web.url.js":"a66c25e402880ea6b966ee8ece30b6df","core-js/modules/web.url.to-json.js":"6357c5a053a36e38c0e24243e550dd86","core-js/modules/web.url-search-params.js":"2494aebefd4ca447de0ef4cfdd47509e","regenerator-runtime":"e155e0d3930b156f86c48e8d05522b16","./model.js":"47ecf14258f00bde4534498b74632124","./views/recipeView.js":"7a075e00040333dc06667640b8596934","./views/searchView.js":"38bdde45f47aa361e4f1f15b2f6f5828","./views/resultsView.js":"deb432cb91590e2fbbc1a0ba70c55402","./views/paginationView.js":"8bc47c6b7c35b8096dc70b454a799c4d"}],"140df4f8e97a45c53c66fead1f5a9e92":[function(require,module,exports) {
 var $ = require('../internals/export');
 
 var global = require('../internals/global');
@@ -4587,7 +4603,7 @@ try {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.loadSearchResults = exports.loadRecipe = exports.state = void 0;
+exports.getSearchResultsPage = exports.loadSearchResults = exports.loadRecipe = exports.state = void 0;
 
 var _config = require("./config.js");
 
@@ -4597,7 +4613,9 @@ const state = {
   recipe: {},
   search: {
     query: '',
-    results: []
+    results: [],
+    page: 1,
+    resultsPerPage: _config.RECIPES_PER_PAGE
   }
 }; // Changes state object. Does not return anything.
 // Not a pure function as it manipulates state which is outside of the function
@@ -4650,17 +4668,30 @@ const loadSearchResults = async function (query) {
 };
 
 exports.loadSearchResults = loadSearchResults;
+
+const getSearchResultsPage = function (page = state.search.page) {
+  state.search.page = page;
+  const start = (page - 1) * state.search.resultsPerPage; // 0;
+
+  const end = page * state.search.resultsPerPage; // 9;
+
+  return state.search.results.slice(start, end);
+};
+
+exports.getSearchResultsPage = getSearchResultsPage;
 },{"./config.js":"26812f7d6f7d8fabc379365ccfa03163","./helpers.js":"b1ca0bdc3f3f9e95347882646f46b1d4"}],"26812f7d6f7d8fabc379365ccfa03163":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.TIMEOUT_SEC = exports.API_URL = void 0;
+exports.RECIPES_PER_PAGE = exports.TIMEOUT_SEC = exports.API_URL = void 0;
 const API_URL = `https://forkify-api.herokuapp.com/api/v2/recipes/`;
 exports.API_URL = API_URL;
 const TIMEOUT_SEC = 10;
 exports.TIMEOUT_SEC = TIMEOUT_SEC;
+const RECIPES_PER_PAGE = 10;
+exports.RECIPES_PER_PAGE = RECIPES_PER_PAGE;
 },{}],"b1ca0bdc3f3f9e95347882646f46b1d4":[function(require,module,exports) {
 "use strict";
 
@@ -5485,6 +5516,94 @@ class ResultsView extends _view.default {
 }
 
 var _default = new ResultsView();
+
+exports.default = _default;
+},{"./view.js":"907482bc26116fa760693a41e8859ac9","url:../../img/icons.svg":"54723579b5fec6060686b051512cd431"}],"8bc47c6b7c35b8096dc70b454a799c4d":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _view = _interopRequireDefault(require("./view.js"));
+
+var _icons = _interopRequireDefault(require("url:../../img/icons.svg"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+// Parcel 2
+class PaginationView extends _view.default {
+  constructor(...args) {
+    super(...args);
+
+    _defineProperty(this, "_parentElement", document.querySelector('.pagination'));
+  }
+
+  addHandlerClick(handler) {
+    this._parentElement.addEventListener('click', e => {
+      const btn = e.target.closest('.btn--inline'); // searches up in the DOM tree for parents
+
+      if (!btn) return;
+      const goToPage = +btn.dataset.goto;
+      handler(goToPage);
+    });
+  }
+
+  _generateMarkup() {
+    const currentPage = this._data.page;
+    const numPages = Math.ceil(this._data.results.length / this._data.resultsPerPage); // Page 1, and there other pages
+
+    if (currentPage === 1 && numPages > 1) {
+      return `
+        <button class="btn--inline pagination__btn--next" data-goto="${currentPage + 1}">
+          <span>Page ${currentPage + 1}</span>
+          <svg class="search__icon">
+            <use href="${_icons.default}#icon-arrow-right"></use>
+          </svg>
+        </button>
+      `;
+    } // Last page
+
+
+    if (currentPage === numPages && numPages > 1) {
+      return `
+        <button class="btn--inline pagination__btn--prev" data-goto="${currentPage - 1}">
+          <svg class="search__icon">
+            <use href="${_icons.default}#icon-arrow-left"></use>
+          </svg>
+          <span>Page ${currentPage - 1}</span>
+        </button>
+      `;
+    } // all other pages
+
+
+    if (currentPage < numPages) {
+      return `
+        <button class="btn--inline pagination__btn--prev" data-goto="${currentPage - 1}">
+          <svg class="search__icon">
+            <use href="${_icons.default}#icon-arrow-left"></use>
+          </svg>
+          <span>Page ${currentPage - 1}</span>
+        </button>
+        <button class="btn--inline pagination__btn--next" data-goto="${currentPage + 1}">
+          <span>Page ${currentPage + 1}</span>
+          <svg class="search__icon">
+            <use href="${_icons.default}#icon-arrow-right"></use>
+          </svg>
+        </button>
+      `;
+    } // Page 1, and there are NO other pages
+
+
+    return '';
+  }
+
+}
+
+var _default = new PaginationView();
 
 exports.default = _default;
 },{"./view.js":"907482bc26116fa760693a41e8859ac9","url:../../img/icons.svg":"54723579b5fec6060686b051512cd431"}]},{},["19135baa828ba24782eb17cc08e9142d","83c8fc3340e62496516db8800d01cd31","c5843767b0bc0784c718518d67d386e0"], null)
