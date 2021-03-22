@@ -14,6 +14,38 @@ export default class View {
     this._parentElement.insertAdjacentHTML('afterbegin', markup);
   }
 
+  update(data) {
+    this._data = data;
+    const newMarkup = this._generateMarkup();
+
+    // Converts newMarkup String into virtual DOM
+    const newDOM = document.createRange().createContextualFragment(newMarkup);
+    const newElements = Array.from(newDOM.querySelectorAll('*')); // '*' select all elements
+    // console.log(newElements); // renders nodelist of entire elements in the newDOM
+    const currentElements = Array.from(
+      this._parentElement.querySelectorAll('*')
+    );
+    // console.log(currentElements);
+
+    newElements.forEach((newEl, i) => {
+      const curEl = currentElements[i];
+      console.log(curEl, newEl.isEqualNode(curEl));
+      // Updates changed TEXT
+      if (
+        !newEl.isEqualNode(curEl) &&
+        newEl.firstChild?.nodeValue.trim() !== ''
+      ) {
+        curEl.textContent = newEl.textContent;
+      }
+      // Updates changed ATTRIBUTES
+      if (!newEl.isEqualNode(curEl)) {
+        Array.from(newEl.attributes).forEach(attribute =>
+          curEl.setAttribute(attribute.name, attribute.value)
+        );
+      }
+    });
+  }
+
   _clear() {
     this._parentElement.innerHTML = ''; // gets rid of "start by searching" message
   }
