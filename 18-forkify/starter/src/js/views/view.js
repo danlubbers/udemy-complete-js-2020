@@ -80,7 +80,7 @@ export default class View {
     this._parentElement.insertAdjacentHTML('afterbegin', markup);
   }
 
-  renderSuccess(successMessage) {
+  renderSuccess(message = this._message) {
     const markup = `
       <div class="message">
         <div>
@@ -88,7 +88,7 @@ export default class View {
             <use href="${icons}#icon-smile"></use>
           </svg>
         </div>
-        <p>${successMessage}</p>
+        <p>${message}</p>
       </div>
     `;
     this._clear();

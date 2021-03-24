@@ -1,9 +1,11 @@
 import * as model from './model.js';
+import { MODAL_CLOSE_SEC } from './config.js';
 import recipeView from './views/recipeView.js';
 import searchView from './views/searchView.js';
 import resultsView from './views/resultsView.js';
 import paginationView from './views/paginationView.js';
 import bookmarksView from './views/bookmarksView.js';
+import addRecipeView from './views/addRecipeView.js';
 import 'core-js/stable'; // for older browsers - polyfill everything except async
 import 'regenerator-runtime'; // for older browsers - polyfill asyn/await
 
@@ -48,7 +50,7 @@ const controlSearchResults = async function () {
 
     // 3. Render results
     // resultsView.render(model.state.search.results);
-    resultsView.render(model.getSearchResultsPage(3));
+    resultsView.render(model.getSearchResultsPage(1));
 
     // 4. Render initial pagination buttons
     paginationView.render(model.state.search);
@@ -89,6 +91,33 @@ const controlBookmarks = function () {
   bookmarksView.render(model.state.bookmarks);
 };
 
+const controlAddRecipe = async function (newRecipe) {
+  try {
+    // Upload the new recipe data
+    await model.uploadRecipe(newRecipe);
+
+    // render recipe
+    recipeView.render(model.state.recipe);
+
+    // Success Message
+    addRecipeView.renderSuccess();
+
+    // Render bookmark view
+    bookmarksView.render(model.state.bookmarks);
+
+    // Change URL ID
+    window.history.pushState(null, '', `#${model.state.recipe.id}`);
+
+    // Close FORM
+    setTimeout(function () {
+      addRecipeView.toggleWindow();
+    }, MODAL_CLOSE_SEC * 1000);
+  } catch (err) {
+    console.error('🤷🏼‍♂️', err);
+    addRecipeView.renderError(err.message);
+  }
+};
+
 const init = function () {
   // Subscriber
   bookmarksView.addHandlerRender(controlBookmarks);
@@ -97,5 +126,6 @@ const init = function () {
   recipeView.addHandlerAddBookmark(controlAddBookmark);
   searchView.addHandlerSearch(controlSearchResults);
   paginationView.addHandlerClick(controlPagination);
+  addRecipeView.addHandlerUpload(controlAddRecipe);
 };
 init();
